@@ -1,11 +1,7 @@
 package GLarkBot
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/xiehengjian/GRequests"
 )
 
 type Card struct {
@@ -76,21 +72,13 @@ func (this *Bot) SendCardWithOpenID(OpenID string) {
 			},
 		},
 	}
-	client := http.Client{}
+
 	url := "https://open.feishu.cn/open-apis/message/v4/send/"
-	data := make(map[string]interface{})
-	data["open_id"] = OpenID
-	data["card"] = card
-	bytesData, _ := json.Marshal(data)
-	fmt.Println(string(bytesData))
-	//创建请求
-	request, _ := http.NewRequest("POST", url, bytes.NewReader(bytesData))
-	//设置请求头
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	request.Header.Set("Content-Type", "application/json")
-	//执行请求
-	r, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(r.Body)
-	fmt.Println(string(bytes))
+	data := map[string]interface{}{
+		"open_id":OpenID,
+		"card":card,
+	}
+	GRequests.Post(url,this.TenantAccessHeader,data)
+
 
 }

@@ -1,9 +1,7 @@
 package GLarkBot
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
+	"github.com/xiehengjian/GRequests"
 )
 
 type GroupInfoResponse struct {
@@ -32,26 +30,15 @@ type GroupListData struct {
 }
 
 func (this *Bot) GetGroupInfo(ChatID string) GroupInfoData {
-	client := http.Client{}
 	url := "https://open.feishu.cn/open-apis/chat/v4/info?chat_id=" + ChatID
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	response, _ := client.Do(request)
 	body := GroupInfoResponse{}
-	bytes, _ := ioutil.ReadAll(response.Body)
-	json.Unmarshal(bytes, &body)
+	GRequests.Unmarshal(GRequests.Get(url,this.TenantAccessHeader,nil).Body,&body)
 	return body.Data
 }
 
 func (this *Bot) GetGroupList() []GroupInfoData {
-	client := http.Client{}
 	url := "https://open.feishu.cn/open-apis/chat/v4/list"
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	response, _ := client.Do(request)
 	body := GroupListResponse{}
-	bytes, _ := ioutil.ReadAll(response.Body)
-	json.Unmarshal(bytes, &body)
+	GRequests.Unmarshal(GRequests.Get(url,this.TenantAccessHeader,nil).Body,&body)
 	return body.Data.Groups
-
 }

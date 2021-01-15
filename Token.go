@@ -1,11 +1,8 @@
 package GLarkBot
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/xiehengjian/GRequests"
 )
 
 type Tenant struct {
@@ -27,48 +24,33 @@ type User struct {
 }
 
 func (this *Bot) GetTenantAccessToken() {
-	//先创建一个客户端
-	client := http.Client{}
-	//定义请求地址
 	url := "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal/"
 	//定义请求主题
-	data := make(map[string]interface{})
-	data["app_id"] = this.AppID
-	data["app_secret"] = this.AppSecret
-	bytesData, _ := json.Marshal(data)
-	//创建请求
-	request, _ := http.NewRequest("POST", url, bytes.NewReader(bytesData))
-	//设置请求头
-	request.Header.Set("Content-Type", "application/json")
-	//执行请求
-	r, _ := client.Do(request)
+	data := map[string]interface{}{
+		"app_id":this.AppID,
+		"app_secret": this.AppSecret,
+	}
+	header:=map[string]string{
+		"Content-Type":"application/json",
+	}
 	body := Tenant{}
-	bytes, _ := ioutil.ReadAll(r.Body)
-	json.Unmarshal(bytes, &body)
+	GRequests.Unmarshal(GRequests.Post(url,header,data).Body,&body)
 	this.TenantAccessToken = body.Tenant_access_token
-
 }
 
 func (this *Bot) GetUserAccessToken(code string) {
-	//先创建一个客户端
-	client := http.Client{}
-	//定义请求地址
 	url := "https://open.feishu.cn/open-apis/authen/v1/access_token"
 	//定义请求主题
-	data := make(map[string]interface{})
-	data["app_access_token"] = this.TenantAccessToken
-	data["grant_type"] = "authorization_code"
-	data["code"] = code
-	bytesData, _ := json.Marshal(data)
-	//创建请求
-	request, _ := http.NewRequest("POST", url, bytes.NewReader(bytesData))
-	//设置请求头
-	request.Header.Set("Content-Type", "application/json")
-	//执行请求
-	r, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(r.Body)
+	data := map[string]interface{}{
+		"app_access_token":this.TenantAccessToken,
+		"grant_type":"authorization_code",
+		"code":code,
+	}
+	header:=map[string]string{
+		"Content-Type":"application/json",
+	}
 	body := User{}
-	json.Unmarshal(bytes, &body)
+	GRequests.Unmarshal(GRequests.Post(url,header,data).Body,&body)
 
 	this.UserAccessToken = body.Data.Access_token
 	this.RefreshToken = body.Data.Refresh_token
@@ -79,26 +61,19 @@ func (this *Bot) GetUserAccessToken(code string) {
 }
 
 func (this *Bot) RefreshUserAccessToken() {
-	//先创建一个客户端
-	client := http.Client{}
-	//定义请求地址
 	url := "https://open.feishu.cn/open-apis/authen/v1/refresh_access_token"
 	//定义请求主题
-	data := make(map[string]interface{})
-	data["app_access_token"] = this.TenantAccessToken
-	data["grant_type"] = "refresh_token"
-	data["refresh_token"] = this.RefreshToken
-	bytesData, _ := json.Marshal(data)
-	//创建请求
-	request, _ := http.NewRequest("POST", url, bytes.NewReader(bytesData))
-	//设置请求头
-	request.Header.Set("Content-Type", "application/json")
-	//执行请求
-	r, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(r.Body)
-	body := User{}
-	json.Unmarshal(bytes, &body)
+	data := map[string]interface{}{
+		"app_access_token":this.TenantAccessToken,
+		"grant_type":"refresh_token",
+		"refresh_token": this.RefreshToken,
 
+	}
+	header:=map[string]string{
+		"Content-Type":"application/json",
+	}
+	body := User{}
+	GRequests.Unmarshal(GRequests.Post(url,header,data).Body,&body)
 	this.UserAccessToken = body.Data.Access_token
 	this.RefreshToken = body.Data.Refresh_token
 	//暂存UserToken

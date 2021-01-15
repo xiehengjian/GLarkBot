@@ -1,10 +1,7 @@
 package GLarkBot
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/xiehengjian/GRequests"
 )
 
 type UserListResponse struct {
@@ -74,43 +71,22 @@ type UserIDInfoData struct {
 	User_id string
 }
 func (this *Bot) GetUserList() {
-	client := http.Client{}
 	url := "https://open.feishu.cn/open-apis/contact/v3/users"
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	response, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(response.Body)
-	fmt.Println(string(bytes))
+	body:=make(map[string]interface{})
+	GRequests.Unmarshal(GRequests.Post(url,this.TenantAccessHeader,nil).Body,&body)
 }
 
 func (this *Bot) GetUserInfoWithOpenID(openID string) UserInfo {
-	client := http.Client{}
 	url := "https://open.feishu.cn/open-apis/contact/v3/users/" + openID
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	response, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(response.Body)
-
 	body := UserInfoResponse{}
-	json.Unmarshal(bytes, &body)
+	GRequests.Unmarshal(GRequests.Post(url,this.TenantAccessHeader,nil).Body,&body)
 	return body.Data.User
-
 }
 
+
 func (this *Bot) GetUserIDInfoWithMobiles(mobiles string) UserIDInfoData{
-	client:=http.Client{}
 	url:="https://open.feishu.cn/open-apis/user/v1/batch_get_id?mobiles="+mobiles
-	request, _ := http.NewRequest("GET", url, nil)
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+this.TenantAccessToken)
-	response, _ := client.Do(request)
-	bytes, _ := ioutil.ReadAll(response.Body)
-
 	body := GetUserIDInfoWithMobilesResponse{}
-	json.Unmarshal(bytes, &body)
-	fmt.Println(body.Data.Mobile_users)
+	GRequests.Unmarshal(GRequests.Post(url,this.TenantAccessHeader,nil).Body,&body)
 	return body.Data.Mobile_users[mobiles][0]
-
 }

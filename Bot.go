@@ -13,13 +13,18 @@ type Bot struct {
 	UserAccessToken   string
 	AppAccessToken    string
 	RefreshToken      string
+	TenantAccessHeader map[string]string
+	UserAccessHeader map[string]string
 }
+
 
 func NewBot(AppID string, AppSecret string) Bot {
 	bot := Bot{AppID: AppID, AppSecret: AppSecret}
 	bot.GetTenantAccessToken()
 	bot.ReadUserAccessToken()
 	bot.ReadRefreshToken()
+	bot.GetTenantAccessHeader()
+	bot.GetUserAccessHeader()
 	return bot
 }
 
@@ -67,4 +72,18 @@ func (this *Bot) ReadRefreshToken() {
 		this.RefreshToken = string(contentByte)
 	}
 
+}
+
+func (this *Bot)GetTenantAccessHeader(){
+	this.TenantAccessHeader=map[string]string{
+		"Content-Type":"application/json",
+		"Authorization":"Bearer "+this.TenantAccessToken,
+	}
+}
+
+func (this *Bot)GetUserAccessHeader(){
+	this.UserAccessHeader=map[string]string{
+		"Content-Type":"application/json",
+		"Authorization":"Bearer "+this.UserAccessToken,
+	}
 }
