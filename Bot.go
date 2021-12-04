@@ -13,8 +13,10 @@ type Bot struct {
 	UserAccessToken   string
 	AppAccessToken    string
 	RefreshToken      string
+	RedirectURI string
 	TenantAccessHeader map[string]string
 	UserAccessHeader map[string]string
+	
 }
 
 
